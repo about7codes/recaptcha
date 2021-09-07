@@ -58,6 +58,21 @@
     color: blue;
     cursor: pointer;
   }
+
+  .forgot{
+    cursor: not-allowed;
+  }
+
+  .options{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+  }
+
+  #status{
+    text-align: right;
+  }
   
   button {
     margin: 2rem;

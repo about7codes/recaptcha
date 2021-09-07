@@ -24,6 +24,10 @@
     <div class="container">
         <form class="form-1">
           <h1>Login</h1>
+          <div class="options">
+            <a href="https://gcaptcha.netlify.app/" id='reload'>Refresh</a>
+            <div id='status'>Not logged.</div>
+          </div>
           <label for="email">Email</label>
           <input type="email" name="email" id="email" required />
           <label for="password">Password</label>
@@ -41,7 +45,7 @@
             data-sitekey="6LecWzscAAAAAN9r8ljxZUy_8-7MZSpaaqj-S5E_"
           ></div> -->
 
-          <span>Forgot Password</span>
+          <span class="forgot">Forgot Password</span>
           <button id='login'>Login</button>
   
           <!-- .........///sign-up///.......... -->
@@ -75,6 +79,8 @@
 
         let loginCount = 0;
         $('#login').click(() => {
+
+          // Reset clicks after 10 seconds 
           setTimeout(() => {
             loginCount = 0;
             console.log('Login cick reset.');
@@ -82,25 +88,33 @@
           // gRes();
           loginCount += 1;
           console.log(loginCount);
+
+          if($('#password').val() && $('#email').val()){
+            $('#status').text('Login success.').css('color', 'green');
+          }
+
+          // Render captcha on 3 clicks 
           if(loginCount === 3){
-              // loginCount = 0;
-              if($('#g-recap').is(':empty')){
-                console.log('Captcha empty ' + $('#g-recap').is(':empty'));
-                $('#login').attr("disabled", true);
-                grecaptcha.render('g-recap', {
-                  'sitekey' : '6LecWzscAAAAAN9r8ljxZUy_8-7MZSpaaqj-S5E_',
-                  'callback' : 'gRes',
-                  'expired-callback': 'expCallback'
-                });
-              }
+            // loginCount = 0;
+            if($('#g-recap').is(':empty')){
+              console.log('Captcha empty ' + $('#g-recap').is(':empty'));
+              $('#login').attr("disabled", true);
+              $('#status').text('Captcha required.').css('color', 'red');
+              grecaptcha.render('g-recap', {
+                'sitekey' : '6LecWzscAAAAAN9r8ljxZUy_8-7MZSpaaqj-S5E_',
+                'callback' : 'gRes',
+                'expired-callback': 'expCallback'
+              });
+            }
           }
         });
-
       };
 
       function gRes(){
         const res = grecaptcha.getResponse();
-        console.log( 'Respo: ' + res);
+        console.log( 'token: ' + res);
+
+        $('#status').text('Captcha checked.').css('color', 'black');
 
         if(res.length > 0){
           $('#login').attr("disabled", false);
@@ -110,6 +124,7 @@
       function expCallback(){
         console.log('Captcha expired');
         $('#login').attr("disabled", true);
+        $('#status').text('Captcha expired.').css('color', 'red');
       }
 
       $(document).ready(() => {
@@ -119,7 +134,6 @@
         $('form').submit((e) => {
           e.preventDefault();
         })
-
         
       });
 
