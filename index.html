@@ -90,7 +90,15 @@
           console.log(loginCount);
 
           if($('#password').val() && $('#email').val()){
-            $('#status').text('Login success.').css('color', 'green');
+            $('#status').text('Login success.');
+
+            if($('#status').css('color') == 'rgb(0, 128, 0)'){
+              $('#status').css('color', 'rgb(128, 0, 128)')
+            }else if($('#status').css('color') == 'rgb(128, 0, 128)'){
+              $('#status').css('color', 'rgb(0, 128, 0)');
+            }else{
+              $('#status').css('color', 'rgb(0, 128, 0)');
+            }
           }
 
           // Render captcha on 3 clicks 
