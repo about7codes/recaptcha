@@ -102,17 +102,14 @@
           }
 
           // Render captcha on 3 clicks 
-          if(loginCount === 3){
+          if(loginCount >= 3){
             // loginCount = 0;
             if($('#g-recap').is(':empty')){
               console.log('Captcha empty ' + $('#g-recap').is(':empty'));
               $('#login').attr("disabled", true);
               $('#status').text('Captcha required.').css('color', 'red');
-              grecaptcha.render('g-recap', {
-                'sitekey' : '6LecWzscAAAAAN9r8ljxZUy_8-7MZSpaaqj-S5E_',
-                'callback' : 'gRes',
-                'expired-callback': 'expCallback'
-              });
+
+              renderCaptcha();
             }
           }
         });
@@ -135,17 +132,95 @@
         $('#status').text('Captcha expired.').css('color', 'red');
       }
 
-      $(document).ready(() => {
+      function renderCaptcha(){
+        grecaptcha.render('g-recap', {
+          'sitekey' : '6LecWzscAAAAAN9r8ljxZUy_8-7MZSpaaqj-S5E_',
+          'callback' : 'gRes',
+          'expired-callback': 'expCallback'
+        });
+      }
 
+      function setClickCount(key, value, ttl) {
+				const now = new Date();
+
+        const prev = JSON.parse(localStorage.getItem(key));
+				// `item` is an object which contains the original value
+				// as well as the time when it's supposed to expire
+				const item = {
+					value: value,
+					expiry: prev?.expiry || now.getTime() + ttl,
+				}
+				localStorage.setItem(key, JSON.stringify(item))
+			}
+
+			function getClickCount(key) {
+				const itemStr = localStorage.getItem(key)
+
+				// if the item doesn't exist, return null
+				if (!itemStr) {
+					return null
+				}
+
+				const item = JSON.parse(itemStr)
+				const now = new Date()
+
+				// compare the expiry time of the item with the current time
+				if (now.getTime() > item.expiry) {
+					// If the item is expired, delete the item from storage
+					// and return null
+					localStorage.removeItem(key)
+					return null
+				}
+				return item.value
+			}
+      
+      $(document).ready(() => {
         console.log('Page ready');
+
+        let clicks = getClickCount('clickCount') || 0;
+
+        if(clicks >= 10){
+          if($('#g-recap').is(':empty')){
+            console.log('Captcha empty ' + $('#g-recap').is(':empty'));
+            $('#login').attr("disabled", true);
+            $('#status').text('Captcha required.').css('color', 'red');
+
+            $.getScript( "https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit", function() {
+              renderCaptcha();
+            });
+
+          }
+        }
+
+        $('#login').click(() => {
+          let clicks = getClickCount('clickCount') || 0;
+          const oneDayInMili = 86400000;
+          const oneMin = 60000;
+          setClickCount('clickCount', ++clicks, oneMin);
+
+          console.log('clickCount ', getClickCount('clickCount'));
+
+          if(clicks >= 10){
+            if($('#g-recap').is(':empty')){
+              console.log('Captcha empty ' + $('#g-recap').is(':empty'));
+              $('#login').attr("disabled", true);
+              $('#status').text('Captcha required.').css('color', 'red');
+
+              $.getScript( "https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit", function() {
+                renderCaptcha();
+              });
+            }
+          }
+        });
 
         $('form').submit((e) => {
           e.preventDefault();
-        })
+        });
         
       });
 
 
     </script>
+
 </body>
 </html>
